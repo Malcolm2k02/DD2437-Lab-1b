@@ -150,3 +150,61 @@ def subsample_data(classA, classB, scenario):
     )
 
 
+def generate_gaussian_data():
+
+    # Equivalent to MATLAB:
+    # x = [-5:0.5:5]'
+    # y = [-5:0.5:5]'
+
+    x = np.arange(-5, 5.5, 0.5)
+    y = np.arange(-5, 5.5, 0.5)
+
+    # Create every possible (x, y) combination
+    xx, yy = np.meshgrid(x, y)
+
+    # Gaussian function:
+    # f(x,y) = exp(-(x^2 + y^2)/10) - 0.5
+
+    z = np.exp(-(xx**2 + yy**2) / 10) - 0.5
+
+    # Convert grid into pattern matrix
+    #
+    # patterns:
+    # row 0 = x coordinates
+    # row 1 = y coordinates
+    #
+    # shape = (2, 441)
+
+    patterns = np.vstack((
+        xx.reshape(-1),
+        yy.reshape(-1)
+    ))
+
+    # One target value for every (x,y)
+    #
+    # shape = (1, 441)
+
+    targets = z.reshape(1, -1)
+
+    return patterns, targets, x, y, xx, yy, z
+
+
+
+def subsample_gaussian(patterns, targets, fraction):
+
+    ndata = patterns.shape[1]
+
+    # Number of samples used for training
+    nsamp = int(fraction * ndata)
+
+    # Random permutation of all sample indices
+    indices = np.random.permutation(ndata)
+
+    # Select first nsamp samples
+    train_indices = indices[:nsamp]
+
+    # Training subset
+    train_patterns = patterns[:, train_indices]
+    train_targets = targets[:, train_indices]
+
+    return train_patterns, train_targets, train_indices
