@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def generate_data(ndata=100):
     mA = np.array([1.0, 0.3])
     sigmaA = 0.2
@@ -208,3 +207,54 @@ def subsample_gaussian(patterns, targets, fraction):
     train_targets = targets[:, train_indices]
 
     return train_patterns, train_targets, train_indices
+
+
+def mackey_glass(beta=0.2, gamma=0.1, n=10, tau=25, T=1505, x_0=1.5):
+    x = np.zeros(T + 1)
+    x[0] = x_0
+
+    for t in range(T):
+        if t - tau < 0:
+            x_tau = 0
+        else:
+            x_tau = x[t - tau]
+
+        x[t + 1] = x[t] + (beta * x_tau) / (1 + x_tau ** n) - gamma * x[t]
+
+    return x
+
+
+def mackey_glass_dataset(x):
+    inputs = []
+    outputs = []
+
+    for t in range(301, 1501):
+        input_t = [x[t - 20], x[t - 15], x[t - 10], x[t - 5], x[t]]
+        output_t = x[t + 5]
+
+        inputs.append(input_t)
+        outputs.append(output_t)
+
+    inputs = np.array(inputs)
+    outputs = np.array(outputs)
+
+    return inputs, outputs
+
+
+def data_split(X, y):
+    n = X.shape[0]
+
+    train_end = int(n * (2 / 3))
+    val_end = int(n * (5 / 6))
+
+    X_train = X[:train_end]
+    y_train = y[:train_end]
+
+    X_val = X[train_end:val_end]
+    y_val = y[train_end:val_end]
+
+    X_test = X[val_end:]
+    y_test = y[val_end:]
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
